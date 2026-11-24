@@ -1,18 +1,18 @@
-# torrent-viewer
+# torrent-reader
 
 Turn a `.torrent` file into a single, self-contained HTML page — a clean file manager view of what's inside the torrent, without downloading anything or opening a BitTorrent client.
 
 ## Quick start
 
 ```bash
-python3 torrent-to-html.py <file.torrent> <output.html>
+python3 torrent-reader.py <file.torrent> <output.html>
 open <output.html>
 ```
 
 Example:
 
 ```bash
-python3 torrent-to-html.py ~/Downloads/ubuntu.torrent ~/Downloads/ubuntu.html
+python3 torrent-reader.py ~/Downloads/ubuntu.torrent ~/Downloads/ubuntu.html
 ```
 
 ## What the page shows
@@ -35,7 +35,7 @@ The torrent metadata is embedded into the page as inline JSON. The generated fil
 
 | File | Purpose |
 | --- | --- |
-| `torrent-to-html.py` | Reads the torrent, parses the bencode, writes the HTML. |
+| `torrent-reader.py` | Reads the torrent, parses the bencode, writes the HTML. |
 | `template.html` | The page template with `/*__DATA__*/null` as the data placeholder. Must stay next to the script. |
 | `README.md` | This file. |
 
