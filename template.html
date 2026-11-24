@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Torrent contents</title>
+<style>
+  :root{
+    --bg:#0a0c10;
+    --panel:#0f1319;
+    --panel2:#12171e;
+    --line:#1c232c;
+    --line2:#28313d;
+    --fg:#e9edf4;
+    --fg2:#9aa5b5;
+    --fg3:#6c7787;
+    --accent:#5eead4;
+    --accent2:#7dd3fc;
+    --hot:#fca5a5;
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(94,234,212,.06), transparent 60%),
+      radial-gradient(900px 500px at 90% -20%, rgba(125,211,252,.05), transparent 60%),
+      var(--bg);
+    color:var(--fg);
+    font:14px/1.45 -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .mono{font-family:ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace}
+  .wrap{width:min(1180px, calc(100% - 40px)); margin:0 auto}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* ---------- header ---------- */
+  header.top{padding:30px 0 18px}
+  .brandline{display:flex; align-items:center; gap:14px; min-width:0}
+  .mark{
+    width:44px;height:44px;flex:0 0 44px;border-radius:13px;
+    background:linear-gradient(160deg, rgba(94,234,212,.22), rgba(125,211,252,.10));
+    border:1px solid rgba(94,234,212,.28);
+    display:grid;place-items:center;
+    box-shadow:0 8px 24px -12px rgba(94,234,212,.5), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .mark svg{width:22px;height:22px;color:var(--accent)}
+  h1{font-size:22px;line-height:1.2;margin:0;font-weight:600;letter-spacing:-.02em;overflow-wrap:anywhere}
+  .subline{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:7px;color:var(--fg3);font-size:12.5px}
+  .ih{color:var(--fg2)}
+  .ih code{color:var(--fg2);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:11.5px}
+
+  .stats{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+  .stat{
+    flex:1 1 140px;background:linear-gradient(180deg, rgba(255,255,255,.02), transparent), var(--panel);
+    border:1px solid var(--line);border-radius:var(--radius);padding:11px 14px;min-width:0;
+  }
+  .stat .k{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--fg3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .stat .v{font-size:16px;font-weight:600;margin-top:3px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .stat .v .u{font-size:12px;font-weight:500;color:var(--fg3);margin-left:2px}
+
+  /* ---------- controls ---------- */
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:22px 0 12px}
+  .field{position:relative;flex:1 1 260px;min-width:200px}
+  .field svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--fg3)}
+  input[type=search]{
+    width:100%;background:var(--panel);border:1px solid var(--line);color:var(--fg);
+    border-radius:10px;padding:9px 34px 9px 34px;font:inherit;outline:none;transition:border-color .15s, box-shadow .15s;
+  }
+  input[type=search]::placeholder{color:var(--fg3)}
+  input[type=search]:focus{border-color:rgba(94,234,212,.5);box-shadow:0 0 0 3px rgba(94,234,212,.10)}
+  .clearbtn{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--fg3);cursor:pointer;font-size:16px;line-height:1;padding:4px 6px;border-radius:6px;display:none}
+  .clearbtn:hover{color:var(--fg);background:var(--panel2)}
+  .field.hasq .clearbtn{display:block}
+  button.btn{
+    background:var(--panel);border:1px solid var(--line);color:var(--fg2);border-radius:10px;
+    padding:9px 13px;font:inherit;cursor:pointer;transition:.15s;white-space:nowrap;
+  }
+  button.btn:hover{color:var(--fg);border-color:var(--line2);background:var(--panel2)}
+  button.btn:active{transform:translateY(1px)}
+
+  /* ---------- chips ---------- */
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+  .chip{
+    display:inline-flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line);
+    color:var(--fg2);border-radius:999px;padding:4px 11px 4px 9px;font-size:12px;cursor:pointer;transition:.15s;
+  }
+  .chip:hover{border-color:var(--line2);color:var(--fg)}
+  .chip .dot{width:7px;height:7px;border-radius:50%;flex:0 0 7px}
+  .chip .n{color:var(--fg3);font-variant-numeric:tabular-nums}
+  .chip[aria-pressed="true"]{background:rgba(94,234,212,.10);border-color:rgba(94,234,212,.45);color:var(--fg)}
+  .chip.all{padding-left:11px}
+
+  /* ---------- panel / table ---------- */
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  .colhead,.row{
+    display:grid;grid-template-columns:22px 18px minmax(0,1fr) 132px 92px 58px;
+    align-items:center;gap:10px;padding-right:16px;
+  }
+  .colhead{
+    padding-top:10px;padding-bottom:10px;border-bottom:1px solid var(--line);
+    font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--fg3);
+    background:var(--panel2);position:sticky;top:0;z-index:2;
+  }
+  .colhead .s-btn{
+    background:none;border:0;padding:0;font:inherit;color:inherit;letter-spacing:inherit;
+    text-transform:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:5px;
+  }
+  .colhead .s-btn:hover{color:var(--fg)}
+  .colhead .s-btn[data-active="true"]{color:var(--accent)}
+  .colhead .arrow{font-size:9px;opacity:.9}
+  .colhead .sz,.colhead .sh{text-align:right;justify-content:flex-end}
+
+  #tree{max-height:min(62vh, 720px);overflow:auto;overscroll-behavior:contain}
+  #tree::-webkit-scrollbar{width:10px}
+  #tree::-webkit-scrollbar-thumb{background:#232c37;border-radius:8px;border:3px solid var(--panel)}
+
+  .row{
+    height:34px;border-bottom:1px solid rgba(255,255,255,.028);cursor:default;
+    position:relative;
+  }
+  .row:hover{background:rgba(255,255,255,.024)}
+  .row.dir{cursor:pointer}
+  .row.sel{background:rgba(94,234,212,.07)}
+  .row.sel::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--accent)}
+  .twisty{display:flex;align-items:center;justify-content:center;color:var(--fg3);transition:transform .14s}
+  .twisty svg{width:11px;height:11px}
+  .row.dir.open .twisty{transform:rotate(90deg)}
+  .ico{display:flex;align-items:center;justify-content:center;color:var(--fg3)}
+  .ico svg{width:15px;height:15px}
+  .row.dir .ico{color:var(--accent2);opacity:.85}
+  .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dirp{color:var(--fg3);font-size:12.5px}
+  .fname{color:var(--fg)}
+  mark{background:rgba(94,234,212,.16);color:var(--accent);border-radius:3px;padding:0 1px}
+  .row.dir .fname{color:var(--fg);font-weight:500}
+  .bar{height:4px;border-radius:3px;background:rgba(255,255,255,.05);overflow:hidden;display:flex;justify-content:flex-end}
+  .bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg, rgba(94,234,212,.4), rgba(125,211,252,.9));min-width:2px}
+  .bar i.z{background:rgba(255,255,255,.18)}
+  .sz{text-align:right;font-variant-numeric:tabular-nums;color:var(--fg2);font-size:12.5px}
+  .row.dir .sz{color:var(--fg)}
+  .sh{text-align:right;font-variant-numeric:tabular-nums;color:var(--fg3);font-size:11.5px}
+  .empty{padding:40px 16px;text-align:center;color:var(--fg3);font-size:13px}
+
+  /* ---------- details ---------- */
+  details.meta{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  details.meta summary{
+    list-style:none;cursor:pointer;padding:12px 16px;display:flex;align-items:center;gap:10px;
+    font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--fg3);
+  }
+  details.meta summary::-webkit-details-marker{display:none}
+  details.meta summary:hover{color:var(--fg2)}
+  details.meta summary .caret{transition:transform .15s;font-size:9px}
+  details.meta[open] summary .caret{transform:rotate(90deg)}
+  details.meta[open] summary{border-bottom:1px solid var(--line);color:var(--fg2)}
+  .meta-body{padding:14px 16px}
+  .kv{display:grid;grid-template-columns:150px minmax(0,1fr);gap:8px 16px;font-size:12.5px}
+  .kv dt{color:var(--fg3)}
+  .kv dd{margin:0;color:var(--fg2);overflow-wrap:anywhere}
+  .trk{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:4px 18px;font-size:12px;color:var(--fg2);max-height:260px;overflow:auto}
+  .trk span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .trk b{color:var(--accent);font-weight:600}
+  footer{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;color:var(--fg3);font-size:12px;padding:18px 0 34px}
+  .path{font-family:ui-monospace,Menlo,monospace;color:var(--fg3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%}
+
+  /* toast */
+  #toast{
+    position:fixed;left:50%;bottom:26px;transform:translate(-50%, 14px);
+    background:#161c24;border:1px solid var(--line2);color:var(--fg);
+    padding:9px 16px;border-radius:10px;font-size:12.5px;opacity:0;pointer-events:none;
+    transition:.2s ease;box-shadow:0 16px 40px -14px rgba(0,0,0,.8);z-index:50;
+  }
+  #toast.on{opacity:1;transform:translate(-50%,0)}
+
+  @media (max-width:760px){
+    .colhead,.row{grid-template-columns:20px 16px minmax(0,1fr) 84px 50px}
+    .colhead .barh,.row .bar{display:none}
+    .stats{gap:8px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brandline">
+      <div class="mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
+        </svg>
+      </div>
+      <div style="min-width:0">
+        <h1 id="tname">…</h1>
+        <div class="subline">
+          <span class="ih">info hash <code id="ih" class="mono">…</code></span>
+          <button class="btn" id="copyih" style="padding:2px 8px;font-size:11.5px">copy</button>
+          <button class="btn" id="copymagnet" style="padding:2px 8px;font-size:11.5px">magnet</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <div class="toolbar">
+    <div class="field" id="field">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Search files and folders…   ( / )" autocomplete="off" spellcheck="false">
+      <button class="clearbtn" id="clearq" aria-label="Clear">×</button>
+    </div>
+    <button class="btn" id="expandall">Expand all</button>
+    <button class="btn" id="collapseall">Collapse all</button>
+  </div>
+
+  <div class="chips" id="chips"></div>
+
+  <div class="panel">
+    <div class="colhead">
+      <span></span><span></span>
+      <button class="s-btn" data-sort="name">Name <span class="arrow"></span></button>
+      <span class="barh"></span>
+      <button class="s-btn sz" data-sort="size">Size <span class="arrow"></span></button>
+      <span class="sh">Share</span>
+    </div>
+    <div id="tree"></div>
+  </div>
+
+  <details class="meta" id="trkbox">
+    <summary><span class="caret">▶</span> Trackers <span id="trkcount" style="color:var(--fg3);text-transform:none;letter-spacing:0"></span></summary>
+    <div class="meta-body"><div class="trk" id="trklist"></div></div>
+  </details>
+
+  <details class="meta">
+    <summary><span class="caret">▶</span> Torrent details</summary>
+    <div class="meta-body">
+      <dl class="kv" id="kvs"></dl>
+    </div>
+  </details>
+
+  <footer>
+    <span id="footleft"></span>
+    <span class="path" id="footright"></span>
+  </footer>
+</div>
+<div id="toast"></div>
+
+<script>
+const DATA = /*__DATA__*/null;
+
+/* ---------- helpers ---------- */
+const UNITS = ['B','KiB','MiB','GiB','TiB'];
+function fmt(n){
+  let i = 0, v = n;
+  while (v >= 1024 && i < UNITS.length-1){ v /= 1024; i++; }
+  const d = i === 0 ? 0 : (v < 10 ? 2 : v < 100 ? 1 : 1);
+  return { v: v.toFixed(d).replace(/\.0+$/,''), u: UNITS[i] };
+}
+const fmtHTML = n => { const f = fmt(n); return `${f.v}<span class="u">${f.u}</span>`; };
+const pct = n => DATA.totalSize ? (n / DATA.totalSize) * 100 : 0;
+const pctStr = n => { const p = pct(n); return p > 0 && p < 0.1 ? '&lt;0.1%' : p.toFixed(p < 10 ? 1 : 0) + '%'; };
+const extOf = name => { const i = name.lastIndexOf('.'); return i > 0 ? name.slice(i+1).toLowerCase() : ''; };
+const escapeHTML = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const escapeAttr = escapeHTML;
+function hi(text, q){
+  const esc = escapeHTML(text);
+  if (!q) return esc;
+  const i = text.toLowerCase().indexOf(q);
+  if (i < 0) return esc;
+  return escapeHTML(text.slice(0,i)) + '<mark>' + escapeHTML(text.slice(i, i+q.length)) + '</mark>' + escapeHTML(text.slice(i+q.length));
+}
+
+DATA.files = DATA.files.map(([parts, size]) => ({ parts, size }));
+
+const HUES = [166, 199, 262, 330, 42, 20, 280, 150, 210, 90];
+function hueFor(s){ let h = 0; for (let i=0;i<s.length;i++) h = (h*31 + s.charCodeAt(i)) % 997; return HUES[h % HUES.length]; }
+const colorFor = s => `hsl(${hueFor(s)} 70% 62%)`;
+
+/* ---------- build tree ---------- */
+const root = { name:'', dir:true, children:[], size:0, count:0, path:'' };
+function build(){
+  const nodes = [];
+  for (const { parts, size } of DATA.files){
+    let cur = root;
+    for (let i=0;i<parts.length;i++){
+      const isLeaf = i === parts.length-1;
+      const nm = parts[i];
+      let child = cur.children.find(c => c.name === nm && c.dir === !isLeaf);
+      if (!child){
+        child = { name:nm, dir:!isLeaf, children:[], size:0, count:0, ext: isLeaf ? extOf(nm) : '', parent: cur };
+        cur.children.push(child);
+      }
+      child.size += size;
+      child.count += 1;
+      cur = child;
+    }
+  }
+  (function walk(n){
+    n.path = n.parent ? (n.parent.path ? n.parent.path + '/' + n.name : n.name) : '';
+    for (const c of n.children){ c.parent = n; walk(c); }
+  })(root);
+}
+build();
+
+const state = { q:'', sort:'name', dir:1, ext:null, open:new Set(), sel:null };
+
+/* ---------- header ---------- */
+document.title = DATA.name + ' — contents';
+document.getElementById('tname').textContent = DATA.name;
+document.getElementById('ih').textContent = DATA.infohash.slice(0, 16) + '…';
+document.getElementById('ih').title = DATA.infohash;
+
+const dirCount = (function countDirs(n){ return n.children.reduce((a,c)=> a + (c.dir ? 1 + countDirs(c) : 0), 0); })(root);
+const biggest = DATA.files.reduce((a,f)=> Math.max(a,f.size), 0);
+
+document.getElementById('stats').innerHTML = [
+  ['Total size', fmtHTML(DATA.totalSize)],
+  ['Files', `<span class="num">${DATA.files.length}</span>`],
+  ['Folders', `<span class="num">${dirCount}</span>`],
+  ['Largest file', fmtHTML(biggest)],
+  ['Pieces', `<span class="num">${DATA.pieceCount.toLocaleString()}</span>`],
+  ['Piece size', fmtHTML(DATA.pieceLength)],
+].map(([k,v]) => `<div class="stat"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+
+/* ---------- details ---------- */
+const created = DATA.creationDate ? new Date(DATA.creationDate*1000) : null;
+document.getElementById('kvs').innerHTML = [
+  ['Name', DATA.name],
+  ['Info hash (v1)', `<span class="mono">${DATA.infohash}</span>`],
+  ['Private', DATA.private ? 'yes' : 'no'],
+  ['Created by', DATA.createdBy || '—'],
+  ['Created on', created ? created.toLocaleString(undefined,{dateStyle:'medium', timeStyle:'short'}) : '—'],
+  ['Comment', DATA.comment || '—'],
+].map(([k,v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
+
+const trk = DATA.trackers;
+document.getElementById('trkcount').textContent = '· ' + trk.length;
+document.getElementById('trklist').innerHTML = trk.map(t => {
+  const m = t.match(/^(\w+):\/\/([^/]+)/);
+  return m ? `<span><b>${m[1]}</b> ${m[2]}</span>` : `<span>${t}</span>`;
+}).join('');
+
+/* ---------- extension chips ---------- */
+const extStats = new Map();
+for (const f of DATA.files){
+  const e = extOf(f.parts[f.parts.length-1]) || 'none';
+  const s = extStats.get(e) || { n:0, size:0 };
+  s.n++; s.size += f.size; extStats.set(e, s);
+}
+const exts = [...extStats.entries()].sort((a,b)=> b[1].size - a[1].size);
+document.getElementById('chips').innerHTML =
+  `<button class="chip all" data-ext="">All files <span class="n">${DATA.files.length}</span></button>` +
+  exts.map(([e,s]) =>
+    `<button class="chip" data-ext="${e}" aria-pressed="false" title="${fmt(s.size).v} ${fmt(s.size).u} across ${s.n} file(s)">`+
+    `<span class="dot" style="background:${colorFor(e)}"></span>.${e} <span class="n">${s.n}</span></button>`
+  ).join('');
+
+/* ---------- filtering ---------- */
+function matches(){ 
+  const q = state.q.trim().toLowerCase();
+  const out = [];
+  for (const f of DATA.files){
+    const leaf = f.parts[f.parts.length-1];
+    const e = extOf(leaf) || 'none';
+    if (state.ext && e !== state.ext) continue;
+    if (q){
+      const full = f.parts.join('/').toLowerCase();
+      if (!full.includes(q)) continue;
+    }
+    out.push(f);
+  }
+  return out;
+}
+
+/* ---------- rendering ---------- */
+const treeEl = document.getElementById('tree');
+
+function cmpFiles(a,b){
+  if (state.sort === 'size') return (a.size-b.size) * state.dir;
+  return a.parts[a.parts.length-1].localeCompare(b.parts[b.parts.length-1], undefined, {numeric:true, sensitivity:'base'}) * state.dir;
+}
+function cmpNodes(a,b){
+  if (a.dir !== b.dir) return a.dir ? -1 : 1;
+  if (state.sort === 'size') return (a.size-b.size) * state.dir;
+  return a.name.localeCompare(b.name, undefined, {numeric:true, sensitivity:'base'}) * state.dir;
+}
+
+const ICON_DIR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6h4l2 2.5h7A1.5 1.5 0 0 1 19 10v7a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 3 17V7.5Z"/></svg>';
+const ICON_FILE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M14 3H7a1.5 1.5 0 0 0-1.5 1.5v15A1.5 1.5 0 0 0 7 21h10a1.5 1.5 0 0 0 1.5-1.5V7.5L14 3Z"/><path d="M13.5 3.5V8h4.5"/></svg>';
+const CARET = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
+
+function rowHTML({ depth, name, dir, size, cls, path, ext, prefix, hl }){
+  const w = biggest ? Math.max((size / biggest) * 100, 1.2) : 0;
+  return `<div class="row ${dir ? 'dir' : ''} ${cls || ''}" data-path="${escapeAttr(path)}" style="padding-left:${8 + depth*16}px" ${ext ? `data-ext="${ext}"` : ''}>
+    <span class="twisty">${dir ? CARET : ''}</span>
+    <span class="ico">${dir ? ICON_DIR : ICON_FILE}</span>
+    <span class="nm">${prefix ? `<span class="dirp">${hi(prefix, hl)}</span>` : ''}<span class="fname">${hi(name, hl)}</span></span>
+    <span class="bar"><i class="${w < 2.5 ? 'z' : ''}" style="width:${Math.min(w,100).toFixed(2)}%"></i></span>
+    <span class="sz">${fmtHTML(size)}</span>
+    <span class="sh">${pctStr(size)}</span>
+  </div>`;
+}
+
+function render(){
+  const q = state.q.trim();
+  const flatMode = !!q || !!state.ext;
+
+  if (flatMode){
+    const files = matches().slice().sort(cmpFiles);
+    if (!files.length){ treeEl.innerHTML = `<div class="empty">No files match <b>${escapeHTML(q || '.'+state.ext)}</b>.</div>`; updateFoot(0,0,0); return; }
+    treeEl.innerHTML = files.map(f => {
+      const parts = f.parts.slice();
+      const leaf = parts.pop();
+      const pre = parts.length ? parts.join('/') + '/' : '';
+      return rowHTML({ depth:0, name:leaf, dir:false, size:f.size, path:f.parts.join('/'), prefix:pre, hl:q.toLowerCase() });
+    }).join('');
+    updateFoot(files.length, files.length, files.reduce((a,f)=>a+f.size,0));
+    return;
+  }
+
+  let html = '', rows = 0, bytes = 0, files = 0;
+  (function walk(node, depth){
+    const kids = node.children.slice().sort(cmpNodes);
+    for (const c of kids){
+      const open = state.open.has(c.path);
+      rows++;
+      if (c.dir){
+        html += rowHTML({ depth, name:c.name, dir:true, size:c.size, cls:(open?'open ':'') + (state.sel===c.path?'sel':''), path:c.path });
+        if (open) walk(c, depth+1); else { bytes += c.size; files += c.count; }
+      } else {
+        html += rowHTML({ depth, name:c.name, dir:false, size:c.size, cls: state.sel===c.path?'sel':'', path:c.path });
+        bytes += c.size; files++;
+      }
+    }
+  })(root, 0);
+  treeEl.innerHTML = html || `<div class="empty">Empty torrent.</div>`;
+  updateFoot(rows, files, bytes);
+}
+
+function updateFoot(rows, files, bytes){
+  const f = fmt(bytes);
+  const itemWord = rows === 1 ? 'row' : 'rows';
+  document.getElementById('footleft').innerHTML =
+    `<span class="num">${rows}</span> ${itemWord} · <span class="num">${files}</span> file${files===1?'':'s'} · ` +
+    `<span class="num">${f.v} ${f.u}</span> · <span class="num">${pctStr(bytes)}</span> of torrent`;
+}
+
+/* ---------- events ---------- */
+treeEl.addEventListener('click', e => {
+  const row = e.target.closest('.row');
+  if (!row) return;
+  const path = row.dataset.path;
+  const isDir = row.classList.contains('dir');
+  if (isDir){
+    if (state.open.has(path)) { state.open.delete(path); } else { state.open.add(path); }
+    state.sel = path;
+  } else {
+    state.sel = path;
+    document.getElementById('footright').textContent = path;
+  }
+  render();
+});
+
+document.getElementById('chips').addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  const ext = chip.dataset.ext;
+  state.ext = ext ? (state.ext === ext ? null : ext) : null;
+  document.querySelectorAll('.chip').forEach(c => {
+    const pressed = c.dataset.ext === '' ? !state.ext : c.dataset.ext === state.ext;
+    c.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+  });
+  render();
+});
+document.querySelector('.chip.all').setAttribute('aria-pressed','true');
+
+const qEl = document.getElementById('q');
+const fieldEl = document.getElementById('field');
+qEl.addEventListener('input', () => {
+  state.q = qEl.value;
+  fieldEl.classList.toggle('hasq', !!qEl.value);
+  render();
+});
+document.getElementById('clearq').addEventListener('click', () => {
+  qEl.value = ''; state.q = ''; fieldEl.classList.remove('hasq'); qEl.focus(); render();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement !== qEl){ e.preventDefault(); qEl.focus(); qEl.select(); }
+  if (e.key === 'Escape'){ qEl.value=''; state.q=''; fieldEl.classList.remove('hasq'); qEl.blur(); render(); }
+});
+
+document.querySelectorAll('.colhead .s-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const s = btn.dataset.sort;
+    if (state.sort === s) state.dir *= -1; else { state.sort = s; state.dir = s === 'size' ? -1 : 1; }
+    paintSort(); render();
+  });
+});
+function paintSort(){
+  document.querySelectorAll('.colhead .s-btn').forEach(b => {
+    const active = b.dataset.sort === state.sort;
+    b.dataset.active = active;
+    b.querySelector('.arrow').textContent = active ? (state.dir === 1 ? '▲' : '▼') : '';
+  });
+}
+paintSort();
+
+document.getElementById('expandall').addEventListener('click', () => {
+  state.open.clear();
+  (function walk(n){ for (const c of n.children) if (c.dir){ state.open.add(c.path); walk(c); } })(root);
+  render();
+});
+document.getElementById('collapseall').addEventListener('click', () => { state.open.clear(); render(); });
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(t._h); t._h = setTimeout(()=> t.classList.remove('on'), 1500);
+}
+function copy(text, label){
+  const done = () => toast(label + ' copied');
+  if (navigator.clipboard?.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(() => legacyCopy(text, done));
+  } else legacyCopy(text, done);
+}
+function legacyCopy(text, done){
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); done(); } catch(_) { toast('Copy failed'); }
+  ta.remove();
+}
+function magnet(){
+  const dn = encodeURIComponent(DATA.name);
+  const trk = DATA.trackers.slice(0, 8).map(t => '&tr=' + encodeURIComponent(t)).join('');
+  return `magnet:?xt=urn:btih:${DATA.infohash}&dn=${dn}${trk}`;
+}
+document.getElementById('footright').textContent = 'Click a file to see its full path';
+document.getElementById('copyih').addEventListener('click', () => copy(DATA.infohash, 'Info hash'));
+document.getElementById('copymagnet').addEventListener('click', () => copy(magnet(), 'Magnet link'));
+
+render();
+</script>
+</body>
+</html>
