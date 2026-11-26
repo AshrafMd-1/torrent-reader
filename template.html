@@ -6,6 +6,7 @@
 <title>Torrent contents</title>
 <style>
   :root{
+    color-scheme:dark;
     --bg:#0a0c10;
     --panel:#0f1319;
     --panel2:#12171e;
@@ -16,15 +17,74 @@
     --fg3:#6c7787;
     --accent:#5eead4;
     --accent2:#7dd3fc;
-    --hot:#fca5a5;
     --radius:12px;
+
+    /* theme-aware surfaces & tints */
+    --sheen:rgba(255,255,255,.02);
+    --mark-inset:rgba(255,255,255,.06);
+    --mark-glow:rgba(94,234,212,.5);
+    --mark-end:rgba(125,211,252,.10);
+    --glow-a:rgba(94,234,212,.06);
+    --glow-b:rgba(125,211,252,.05);
+    --tint-1:rgba(94,234,212,.10);
+    --tint-2:rgba(94,234,212,.22);
+    --tint-line:rgba(94,234,212,.28);
+    --tint-line-2:rgba(94,234,212,.45);
+    --tint-focus:rgba(94,234,212,.5);
+    --row-line:rgba(255,255,255,.028);
+    --row-hover:rgba(255,255,255,.024);
+    --sel:rgba(94,234,212,.07);
+    --bar-track:rgba(255,255,255,.05);
+    --bar-min:rgba(255,255,255,.18);
+    --bar-a:rgba(94,234,212,.4);
+    --bar-b:rgba(125,211,252,.9);
+    --mark-bg:rgba(94,234,212,.16);
+    --scroll:#232c37;
+    --toast-bg:#161c24;
+    --toast-shadow:0 16px 40px -14px rgba(0,0,0,.8);
+  }
+  :root[data-theme="light"]{
+    color-scheme:light;
+    --bg:#f6f7f9;
+    --panel:#ffffff;
+    --panel2:#f1f3f7;
+    --line:#e3e7ee;
+    --line2:#c9d2de;
+    --fg:#0f1620;
+    --fg2:#47566a;
+    --fg3:#6b7789;
+    --accent:#0d9488;
+    --accent2:#0b86c9;
+
+    --sheen:rgba(15,22,32,.014);
+    --mark-inset:rgba(255,255,255,.7);
+    --mark-glow:rgba(13,148,136,.22);
+    --mark-end:rgba(11,134,201,.10);
+    --glow-a:rgba(13,148,136,.10);
+    --glow-b:rgba(11,134,201,.08);
+    --tint-1:rgba(13,148,136,.10);
+    --tint-2:rgba(13,148,136,.14);
+    --tint-line:rgba(13,148,136,.28);
+    --tint-line-2:rgba(13,148,136,.45);
+    --tint-focus:rgba(13,148,136,.55);
+    --row-line:rgba(15,22,32,.055);
+    --row-hover:rgba(15,22,32,.032);
+    --sel:rgba(13,148,136,.08);
+    --bar-track:rgba(15,22,32,.07);
+    --bar-min:rgba(15,22,32,.22);
+    --bar-a:rgba(13,148,136,.55);
+    --bar-b:rgba(11,134,201,.85);
+    --mark-bg:rgba(13,148,136,.16);
+    --scroll:#c9d2de;
+    --toast-bg:#ffffff;
+    --toast-shadow:0 16px 40px -14px rgba(15,22,32,.22);
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
   body{
     background:
-      radial-gradient(1200px 600px at 15% -10%, rgba(94,234,212,.06), transparent 60%),
-      radial-gradient(900px 500px at 90% -20%, rgba(125,211,252,.05), transparent 60%),
+      radial-gradient(1200px 600px at 15% -10%, var(--glow-a), transparent 60%),
+      radial-gradient(900px 500px at 90% -20%, var(--glow-b), transparent 60%),
       var(--bg);
     color:var(--fg);
     font:14px/1.45 -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
@@ -32,36 +92,53 @@
     min-height:100vh;
   }
   .mono{font-family:ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace}
-  .wrap{width:min(1180px, calc(100% - 40px)); margin:0 auto}
+  .wrap{width:min(1180px, calc(100% - 40px));margin:0 auto;padding-bottom:34px}
   .num{font-variant-numeric:tabular-nums}
 
   /* ---------- header ---------- */
   header.top{padding:30px 0 18px}
-  .brandline{display:flex; align-items:center; gap:14px; min-width:0}
+  .brandline{display:flex;align-items:flex-start;gap:14px;min-width:0}
   .mark{
     width:44px;height:44px;flex:0 0 44px;border-radius:13px;
-    background:linear-gradient(160deg, rgba(94,234,212,.22), rgba(125,211,252,.10));
-    border:1px solid rgba(94,234,212,.28);
+    background:linear-gradient(160deg, var(--tint-2), var(--mark-end));
+    border:1px solid var(--tint-line);
     display:grid;place-items:center;
-    box-shadow:0 8px 24px -12px rgba(94,234,212,.5), inset 0 1px 0 rgba(255,255,255,.06);
+    box-shadow:0 8px 24px -12px var(--mark-glow), inset 0 1px 0 var(--mark-inset);
   }
   .mark svg{width:22px;height:22px;color:var(--accent)}
+  .brandtext{min-width:0;flex:1 1 auto}
   h1{font-size:22px;line-height:1.2;margin:0;font-weight:600;letter-spacing:-.02em;overflow-wrap:anywhere}
-  .subline{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:7px;color:var(--fg3);font-size:12.5px}
-  .ih{color:var(--fg2)}
-  .ih code{color:var(--fg2);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:11.5px}
+  .subline{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:7px;color:var(--fg3);font-size:12.5px;min-width:0}
+  .ih{display:flex;align-items:center;gap:7px;color:var(--fg3);min-width:0;max-width:100%}
+  .ih .ihlabel{white-space:nowrap}
+  .ih code{
+    color:var(--fg2);background:var(--panel);border:1px solid var(--line);border-radius:6px;
+    padding:2px 7px;font-size:12.5px;letter-spacing:.01em;user-select:all;cursor:text;
+    max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .hact{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .themebtn{
+    flex:0 0 auto;margin-left:auto;width:36px;height:36px;display:grid;place-items:center;
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;color:var(--fg2);
+    cursor:pointer;transition:.15s;
+  }
+  .themebtn:hover{color:var(--fg);border-color:var(--line2);background:var(--panel2)}
+  .themebtn svg{width:16px;height:16px}
+  .themebtn .i-moon{display:none}
+  :root[data-theme="light"] .themebtn .i-sun{display:none}
+  :root[data-theme="light"] .themebtn .i-moon{display:block}
 
   .stats{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
   .stat{
-    flex:1 1 140px;background:linear-gradient(180deg, rgba(255,255,255,.02), transparent), var(--panel);
+    flex:1 1 140px;background:linear-gradient(180deg, var(--sheen), transparent), var(--panel);
     border:1px solid var(--line);border-radius:var(--radius);padding:11px 14px;min-width:0;
   }
   .stat .k{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--fg3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .stat .v{font-size:16px;font-weight:600;margin-top:3px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .stat .v .u{font-size:12px;font-weight:500;color:var(--fg3);margin-left:2px}
+  .stat .v .u{font-size:12px;font-weight:500;color:var(--fg3)}
 
   /* ---------- controls ---------- */
-  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:22px 0 12px}
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 12px}
   .field{position:relative;flex:1 1 260px;min-width:200px}
   .field svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--fg3)}
   input[type=search]{
@@ -69,7 +146,7 @@
     border-radius:10px;padding:9px 34px 9px 34px;font:inherit;outline:none;transition:border-color .15s, box-shadow .15s;
   }
   input[type=search]::placeholder{color:var(--fg3)}
-  input[type=search]:focus{border-color:rgba(94,234,212,.5);box-shadow:0 0 0 3px rgba(94,234,212,.10)}
+  input[type=search]:focus{border-color:var(--tint-focus);box-shadow:0 0 0 3px var(--tint-1)}
   .clearbtn{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;color:var(--fg3);cursor:pointer;font-size:16px;line-height:1;padding:4px 6px;border-radius:6px;display:none}
   .clearbtn:hover{color:var(--fg);background:var(--panel2)}
   .field.hasq .clearbtn{display:block}
@@ -79,6 +156,15 @@
   }
   button.btn:hover{color:var(--fg);border-color:var(--line2);background:var(--panel2)}
   button.btn:active{transform:translateY(1px)}
+  .hact button.btn.act{
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    min-height:32px;padding:5px 10px;font-size:12.5px;font-weight:500;border-radius:9px;line-height:16px;
+    background:var(--panel2);border:1px solid var(--line2);color:var(--fg2);
+  }
+  .hact button.btn.act svg{display:block;width:16px;height:16px;flex:none}
+  .hact button.btn.act:hover{color:var(--fg);border-color:var(--tint-line);background:var(--panel)}
+  .hact button.btn.act.accent{color:var(--accent);border-color:var(--tint-line);background:var(--tint-1)}
+  .hact button.btn.act.accent:hover{border-color:var(--tint-line-2);background:var(--tint-2)}
 
   /* ---------- chips ---------- */
   .chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
@@ -89,14 +175,17 @@
   .chip:hover{border-color:var(--line2);color:var(--fg)}
   .chip .dot{width:7px;height:7px;border-radius:50%;flex:0 0 7px}
   .chip .n{color:var(--fg3);font-variant-numeric:tabular-nums}
-  .chip[aria-pressed="true"]{background:rgba(94,234,212,.10);border-color:rgba(94,234,212,.45);color:var(--fg)}
+  .chip[aria-pressed="true"]{background:var(--tint-1);border-color:var(--tint-line-2);color:var(--fg)}
   .chip.all{padding-left:11px}
 
   /* ---------- panel / table ---------- */
-  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  .panel{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    max-height:min(62vh + 38px, 758px);overflow:auto;overscroll-behavior:contain;
+  }
   .colhead,.row{
-    display:grid;grid-template-columns:22px 18px minmax(0,1fr) 132px 92px 58px;
-    align-items:center;gap:10px;padding-right:16px;
+    display:grid;grid-template-columns:12px 15px minmax(0,1fr) 132px 92px 58px;
+    align-items:center;gap:10px;padding-inline:8px 16px;
   }
   .colhead{
     padding-top:10px;padding-bottom:10px;border-bottom:1px solid var(--line);
@@ -107,22 +196,24 @@
     background:none;border:0;padding:0;font:inherit;color:inherit;letter-spacing:inherit;
     text-transform:inherit;cursor:pointer;display:inline-flex;align-items:center;gap:5px;
   }
+  .colhead [data-sort="name"]{grid-column:2 / 4;padding-inline-start:3px}
   .colhead .s-btn:hover{color:var(--fg)}
   .colhead .s-btn[data-active="true"]{color:var(--accent)}
   .colhead .arrow{font-size:9px;opacity:.9}
   .colhead .sz,.colhead .sh{text-align:right;justify-content:flex-end}
+  .colhead .sz .arrow{order:-1}
+  .colhead .sh{font-size:inherit;color:inherit}
 
-  #tree{max-height:min(62vh, 720px);overflow:auto;overscroll-behavior:contain}
-  #tree::-webkit-scrollbar{width:10px}
-  #tree::-webkit-scrollbar-thumb{background:#232c37;border-radius:8px;border:3px solid var(--panel)}
+  .panel::-webkit-scrollbar{width:10px}
+  .panel::-webkit-scrollbar-thumb{background:var(--scroll);border-radius:8px;border:3px solid var(--panel)}
 
   .row{
-    height:34px;border-bottom:1px solid rgba(255,255,255,.028);cursor:default;
+    height:34px;border-bottom:1px solid var(--row-line);cursor:default;
     position:relative;
   }
-  .row:hover{background:rgba(255,255,255,.024)}
+  .row:hover{background:var(--row-hover)}
   .row.dir{cursor:pointer}
-  .row.sel{background:rgba(94,234,212,.07)}
+  .row.sel{background:var(--sel)}
   .row.sel::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--accent)}
   .twisty{display:flex;align-items:center;justify-content:center;color:var(--fg3);transition:transform .14s}
   .twisty svg{width:11px;height:11px}
@@ -133,11 +224,11 @@
   .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .dirp{color:var(--fg3);font-size:12.5px}
   .fname{color:var(--fg)}
-  mark{background:rgba(94,234,212,.16);color:var(--accent);border-radius:3px;padding:0 1px}
+  mark{background:var(--mark-bg);color:var(--accent);border-radius:3px;padding:0 1px}
   .row.dir .fname{color:var(--fg);font-weight:500}
-  .bar{height:4px;border-radius:3px;background:rgba(255,255,255,.05);overflow:hidden;display:flex;justify-content:flex-end}
-  .bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg, rgba(94,234,212,.4), rgba(125,211,252,.9));min-width:2px}
-  .bar i.z{background:rgba(255,255,255,.18)}
+  .bar{height:4px;border-radius:3px;background:var(--bar-track);overflow:hidden;display:flex;justify-content:flex-start}
+  .bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg, var(--bar-a), var(--bar-b));min-width:2px}
+  .bar i.z{background:var(--bar-min)}
   .sz{text-align:right;font-variant-numeric:tabular-nums;color:var(--fg2);font-size:12.5px}
   .row.dir .sz{color:var(--fg)}
   .sh{text-align:right;font-variant-numeric:tabular-nums;color:var(--fg3);font-size:11.5px}
@@ -158,25 +249,33 @@
   .kv{display:grid;grid-template-columns:150px minmax(0,1fr);gap:8px 16px;font-size:12.5px}
   .kv dt{color:var(--fg3)}
   .kv dd{margin:0;color:var(--fg2);overflow-wrap:anywhere}
-  .trk{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:4px 18px;font-size:12px;color:var(--fg2);max-height:260px;overflow:auto}
+  .trk{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:4px 18px;font-size:12px;color:var(--fg2);max-height:260px;overflow:auto}
   .trk span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .trk b{color:var(--accent);font-weight:600}
-  footer{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;color:var(--fg3);font-size:12px;padding:18px 0 34px}
-  .path{font-family:ui-monospace,Menlo,monospace;color:var(--fg3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%}
 
   /* toast */
   #toast{
     position:fixed;left:50%;bottom:26px;transform:translate(-50%, 14px);
-    background:#161c24;border:1px solid var(--line2);color:var(--fg);
+    background:var(--toast-bg);border:1px solid var(--line2);color:var(--fg);
     padding:9px 16px;border-radius:10px;font-size:12.5px;opacity:0;pointer-events:none;
-    transition:.2s ease;box-shadow:0 16px 40px -14px rgba(0,0,0,.8);z-index:50;
+    transition:.2s ease;box-shadow:var(--toast-shadow);z-index:50;
   }
   #toast.on{opacity:1;transform:translate(-50%,0)}
 
   @media (max-width:760px){
-    .colhead,.row{grid-template-columns:20px 16px minmax(0,1fr) 84px 50px}
+    .colhead,.row{grid-template-columns:12px 15px minmax(0,1fr) 84px 50px}
     .colhead .barh,.row .bar{display:none}
     .stats{gap:8px}
+    .brandline{gap:10px}
+    .hact button.btn.act{min-height:36px}
+  }
+  @media (max-width:480px){
+    .wrap{width:calc(100% - 28px)}
+    .brandline .mark{width:36px;height:36px;flex-basis:36px}
+    h1{font-size:19px}
+    .stat{flex-basis:118px}
+    .colhead,.row{grid-template-columns:12px 15px minmax(0,1fr) 66px 40px;gap:6px;padding-right:8px}
+    .kv{grid-template-columns:minmax(72px, .45fr) minmax(0, 1fr);gap:8px 12px}
   }
 </style>
 </head>
@@ -190,14 +289,26 @@
           <path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
         </svg>
       </div>
-      <div style="min-width:0">
+      <div class="brandtext">
         <h1 id="tname">…</h1>
         <div class="subline">
-          <span class="ih">info hash <code id="ih" class="mono">…</code></span>
-          <button class="btn" id="copyih" style="padding:2px 8px;font-size:11.5px">copy</button>
-          <button class="btn" id="copymagnet" style="padding:2px 8px;font-size:11.5px">magnet</button>
+          <span class="ih"><span class="ihlabel">info hash</span><code id="ih" class="mono">…</code></span>
+          <div class="hact">
+            <button class="btn act" id="copyih" title="Copy info hash">
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 0 1 2-2h10"/></svg>
+              <span>Copy</span>
+            </button>
+            <button class="btn act accent" id="copymagnet" title="Copy magnet link">
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              <span>Magnet</span>
+            </button>
+          </div>
         </div>
       </div>
+      <button class="themebtn" id="theme" aria-label="Toggle light / dark" title="Toggle light / dark">
+        <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.2M12 19.2v2.2M4.4 4.4l1.6 1.6M18 18l1.6 1.6M2.6 12h2.2M19.2 12h2.2M4.4 19.6 6 18M18 6l1.6-1.6"/></svg>
+        <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8.2 8.2 0 1 0 10.5 10.5Z"/></svg>
+      </button>
     </div>
     <div class="stats" id="stats"></div>
   </header>
@@ -205,7 +316,7 @@
   <div class="toolbar">
     <div class="field" id="field">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input id="q" type="search" placeholder="Search files and folders…   ( / )" autocomplete="off" spellcheck="false">
+      <input id="q" type="search" placeholder="Search ..." autocomplete="off" spellcheck="false">
       <button class="clearbtn" id="clearq" aria-label="Clear">×</button>
     </div>
     <button class="btn" id="expandall">Expand all</button>
@@ -216,9 +327,9 @@
 
   <div class="panel">
     <div class="colhead">
-      <span></span><span></span>
+      <span></span>
       <button class="s-btn" data-sort="name">Name <span class="arrow"></span></button>
-      <span class="barh"></span>
+      <span class="barh" title="Size relative to the largest file">Weight</span>
       <button class="s-btn sz" data-sort="size">Size <span class="arrow"></span></button>
       <span class="sh">Share</span>
     </div>
@@ -237,10 +348,6 @@
     </div>
   </details>
 
-  <footer>
-    <span id="footleft"></span>
-    <span class="path" id="footright"></span>
-  </footer>
 </div>
 <div id="toast"></div>
 
@@ -255,7 +362,7 @@ function fmt(n){
   const d = i === 0 ? 0 : (v < 10 ? 2 : v < 100 ? 1 : 1);
   return { v: v.toFixed(d).replace(/\.0+$/,''), u: UNITS[i] };
 }
-const fmtHTML = n => { const f = fmt(n); return `${f.v}<span class="u">${f.u}</span>`; };
+const fmtHTML = n => { const f = fmt(n); return `${f.v}&nbsp;<span class="u">${f.u}</span>`; };
 const pct = n => DATA.totalSize ? (n / DATA.totalSize) * 100 : 0;
 const pctStr = n => { const p = pct(n); return p > 0 && p < 0.1 ? '&lt;0.1%' : p.toFixed(p < 10 ? 1 : 0) + '%'; };
 const extOf = name => { const i = name.lastIndexOf('.'); return i > 0 ? name.slice(i+1).toLowerCase() : ''; };
@@ -276,9 +383,8 @@ function hueFor(s){ let h = 0; for (let i=0;i<s.length;i++) h = (h*31 + s.charCo
 const colorFor = s => `hsl(${hueFor(s)} 70% 62%)`;
 
 /* ---------- build tree ---------- */
-const root = { name:'', dir:true, children:[], size:0, count:0, path:'' };
+const root = { children:[], path:'' };
 function build(){
-  const nodes = [];
   for (const { parts, size } of DATA.files){
     let cur = root;
     for (let i=0;i<parts.length;i++){
@@ -286,18 +392,14 @@ function build(){
       const nm = parts[i];
       let child = cur.children.find(c => c.name === nm && c.dir === !isLeaf);
       if (!child){
-        child = { name:nm, dir:!isLeaf, children:[], size:0, count:0, ext: isLeaf ? extOf(nm) : '', parent: cur };
+        const path = cur.path ? cur.path + '/' + nm : nm;
+        child = { name:nm, dir:!isLeaf, children:[], size:0, path };
         cur.children.push(child);
       }
       child.size += size;
-      child.count += 1;
       cur = child;
     }
   }
-  (function walk(n){
-    n.path = n.parent ? (n.parent.path ? n.parent.path + '/' + n.name : n.name) : '';
-    for (const c of n.children){ c.parent = n; walk(c); }
-  })(root);
 }
 build();
 
@@ -306,7 +408,7 @@ const state = { q:'', sort:'name', dir:1, ext:null, open:new Set(), sel:null };
 /* ---------- header ---------- */
 document.title = DATA.name + ' — contents';
 document.getElementById('tname').textContent = DATA.name;
-document.getElementById('ih').textContent = DATA.infohash.slice(0, 16) + '…';
+document.getElementById('ih').textContent = DATA.infohash;
 document.getElementById('ih').title = DATA.infohash;
 
 const dirCount = (function countDirs(n){ return n.children.reduce((a,c)=> a + (c.dir ? 1 + countDirs(c) : 0), 0); })(root);
@@ -355,7 +457,7 @@ document.getElementById('chips').innerHTML =
   ).join('');
 
 /* ---------- filtering ---------- */
-function matches(){ 
+function matches(){
   const q = state.q.trim().toLowerCase();
   const out = [];
   for (const f of DATA.files){
@@ -388,9 +490,9 @@ const ICON_DIR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 const ICON_FILE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M14 3H7a1.5 1.5 0 0 0-1.5 1.5v15A1.5 1.5 0 0 0 7 21h10a1.5 1.5 0 0 0 1.5-1.5V7.5L14 3Z"/><path d="M13.5 3.5V8h4.5"/></svg>';
 const CARET = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
 
-function rowHTML({ depth, name, dir, size, cls, path, ext, prefix, hl }){
+function rowHTML({ depth, name, dir, size, cls, path, prefix, hl }){
   const w = biggest ? Math.max((size / biggest) * 100, 1.2) : 0;
-  return `<div class="row ${dir ? 'dir' : ''} ${cls || ''}" data-path="${escapeAttr(path)}" style="padding-left:${8 + depth*16}px" ${ext ? `data-ext="${ext}"` : ''}>
+  return `<div class="row ${dir ? 'dir' : ''} ${cls || ''}" data-path="${escapeAttr(path)}" title="${escapeAttr(path)}" style="padding-left:min(${8 + depth*16}px, 25%)">
     <span class="twisty">${dir ? CARET : ''}</span>
     <span class="ico">${dir ? ICON_DIR : ICON_FILE}</span>
     <span class="nm">${prefix ? `<span class="dirp">${hi(prefix, hl)}</span>` : ''}<span class="fname">${hi(name, hl)}</span></span>
@@ -405,43 +507,31 @@ function render(){
   const flatMode = !!q || !!state.ext;
 
   if (flatMode){
-    const files = matches().slice().sort(cmpFiles);
-    if (!files.length){ treeEl.innerHTML = `<div class="empty">No files match <b>${escapeHTML(q || '.'+state.ext)}</b>.</div>`; updateFoot(0,0,0); return; }
+    const files = matches().sort(cmpFiles);
+    if (!files.length){ treeEl.innerHTML = `<div class="empty">No files match <b>${escapeHTML(q || '.'+state.ext)}</b>.</div>`; return; }
     treeEl.innerHTML = files.map(f => {
       const parts = f.parts.slice();
       const leaf = parts.pop();
       const pre = parts.length ? parts.join('/') + '/' : '';
       return rowHTML({ depth:0, name:leaf, dir:false, size:f.size, path:f.parts.join('/'), prefix:pre, hl:q.toLowerCase() });
     }).join('');
-    updateFoot(files.length, files.length, files.reduce((a,f)=>a+f.size,0));
     return;
   }
 
-  let html = '', rows = 0, bytes = 0, files = 0;
+  let html = '';
   (function walk(node, depth){
     const kids = node.children.slice().sort(cmpNodes);
     for (const c of kids){
       const open = state.open.has(c.path);
-      rows++;
       if (c.dir){
         html += rowHTML({ depth, name:c.name, dir:true, size:c.size, cls:(open?'open ':'') + (state.sel===c.path?'sel':''), path:c.path });
-        if (open) walk(c, depth+1); else { bytes += c.size; files += c.count; }
+        if (open) walk(c, depth+1);
       } else {
         html += rowHTML({ depth, name:c.name, dir:false, size:c.size, cls: state.sel===c.path?'sel':'', path:c.path });
-        bytes += c.size; files++;
       }
     }
   })(root, 0);
   treeEl.innerHTML = html || `<div class="empty">Empty torrent.</div>`;
-  updateFoot(rows, files, bytes);
-}
-
-function updateFoot(rows, files, bytes){
-  const f = fmt(bytes);
-  const itemWord = rows === 1 ? 'row' : 'rows';
-  document.getElementById('footleft').innerHTML =
-    `<span class="num">${rows}</span> ${itemWord} · <span class="num">${files}</span> file${files===1?'':'s'} · ` +
-    `<span class="num">${f.v} ${f.u}</span> · <span class="num">${pctStr(bytes)}</span> of torrent`;
 }
 
 /* ---------- events ---------- */
@@ -449,14 +539,10 @@ treeEl.addEventListener('click', e => {
   const row = e.target.closest('.row');
   if (!row) return;
   const path = row.dataset.path;
-  const isDir = row.classList.contains('dir');
-  if (isDir){
+  if (row.classList.contains('dir')){
     if (state.open.has(path)) { state.open.delete(path); } else { state.open.add(path); }
-    state.sel = path;
-  } else {
-    state.sel = path;
-    document.getElementById('footright').textContent = path;
   }
+  state.sel = path;
   render();
 });
 
@@ -534,9 +620,25 @@ function magnet(){
   const trk = DATA.trackers.slice(0, 8).map(t => '&tr=' + encodeURIComponent(t)).join('');
   return `magnet:?xt=urn:btih:${DATA.infohash}&dn=${dn}${trk}`;
 }
-document.getElementById('footright').textContent = 'Click a file to see its full path';
 document.getElementById('copyih').addEventListener('click', () => copy(DATA.infohash, 'Info hash'));
 document.getElementById('copymagnet').addEventListener('click', () => copy(magnet(), 'Magnet link'));
+
+/* ---------- theme ---------- */
+const rootEl = document.documentElement;
+const THEME_KEY = 'torrent-reader-theme';
+try { const saved = localStorage.getItem(THEME_KEY); if (saved === 'light' || saved === 'dark') rootEl.dataset.theme = saved; } catch(_) {}
+function syncThemeBtn(){
+  const light = rootEl.dataset.theme === 'light';
+  const btn = document.getElementById('theme');
+  btn.title = light ? 'Switch to dark' : 'Switch to light';
+  btn.setAttribute('aria-label', btn.title);
+}
+document.getElementById('theme').addEventListener('click', () => {
+  rootEl.dataset.theme = rootEl.dataset.theme === 'light' ? 'dark' : 'light';
+  try { localStorage.setItem(THEME_KEY, rootEl.dataset.theme); } catch(_) {}
+  syncThemeBtn();
+});
+syncThemeBtn();
 
 render();
 </script>

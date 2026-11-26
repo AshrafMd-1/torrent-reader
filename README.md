@@ -18,11 +18,12 @@ python3 torrent-reader.py ~/Downloads/ubuntu.torrent ~/Downloads/ubuntu.html
 ## What the page shows
 
 - **Summary** — total size, file count, folder count, largest file, piece count and piece size.
-- **Info hash** — with copy-to-clipboard and a ready-made magnet link.
-- **File tree** — expandable folders, per-file sizes, and a bar showing each item's share of the torrent.
+- **Info hash** — shown in full (truncated only when the screen is too narrow), with copy-to-clipboard and a ready-made magnet link.
+- **File tree** — expandable folders, per-file sizes, **Weight** bars scaled to the largest file, and **Share** as a percentage of the torrent. Hover a row to see its full path.
+- **Light / dark theme** — dark by default. Use the toggle in the top-right corner to switch; the choice is remembered when browser storage is available.
 - **Search** — flattens the tree to matching paths and highlights the matched text. Press `/` to focus, `Esc` to clear.
 - **Extension filters** — one chip per file type with its count; combine with search.
-- **Sortable columns** — name or size, ascending/descending. Folders always stay above files.
+- **Sortable columns** — name or size, ascending/descending. Folders stay above files in the tree view, and column headings stay visible while scrolling.
 - **Trackers and metadata** — full tracker list, creator, creation date and comment.
 
 Everything renders client-side. No network requests, no external fonts, no dependencies.
